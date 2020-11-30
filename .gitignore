@@ -1,0 +1,11 @@
+__pycache__
+*/__pycache__
+.vscode
+ckpt
+*.png
+*.xlsx
+tmp*.txt
+tmp*.py
+
+
+

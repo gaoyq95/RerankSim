@@ -1,0 +1,2 @@
+model_checkpoint_path: "user-model-0"
+all_model_checkpoint_paths: "user-model-0"
