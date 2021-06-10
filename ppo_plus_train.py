@@ -41,7 +41,6 @@ def parse_args():
     parser.add_argument('--c_rewards_d', default=0.005, type=float, help=' of discriminator')
     parser.add_argument('--update_rate_d', default=5, type=int, help=' of discriminator')
     parser.add_argument('--timestamp_d', type=str, default=datetime.datetime.now().strftime("%Y%m%d%H%M"))
-    parser.add_argument('--pai', type=bool, default=False, help='run on pai')
     FLAGS, _ = parser.parse_known_args()
     return FLAGS
 
@@ -116,16 +115,14 @@ if __name__ == "__main__":
                 for _ in range(args.update_steps):
                     total_loss, mean_return, summary2, step = model.train(x_data, rl_outputs, act_probs_one, act_idx_out, rewards, mask_arr, args.c_entropy)
                 
-                if ((not args.pai) and (step % (10 * int(args.update_steps)) == 0)) or \
-                        (args.pai and ((step+1) % (10 * int(args.update_steps)) == 0)):
+                if step % (10 * int(args.update_steps)) == 0:
                     print('ppo, step: %d'%(step), ', '.join([name+': '+str(value) for name, value in zip(
                                                         metrics_name, [total_loss, mean_return, gauc, ndcg])]))
                     train_writer.add_summary(summary1, step)
                     train_writer.add_summary(summary2, step)
                 
                 # train discriminator
-                if ((not args.pai) and (step % (args.update_rate_d * int(args.update_steps)) == 0)) or \
-                        (args.pai and ((step+1) % (args.update_rate_d * int(args.update_steps)) == 0)):
+                if step % (args.update_rate_d * int(args.update_steps)) == 0:
                     d_label = np.array([1] * lp_x_data.shape[0] + [0] * rl_outputs.shape[0])
                     d_x_data = np.concatenate([lp_x_data, rl_outputs], axis=0)
                     d_pred, d_pv_auc, d_total_loss, d_summary = discriminator.train(d_x_data, d_label)
@@ -134,8 +131,7 @@ if __name__ == "__main__":
                     train_writer_d.add_summary(d_summary, step)
                 
                 # validation
-                if ((not args.pai) and (step % (100 * int(args.update_steps)) == 0)) or \
-                        (args.pai and ((step+1) % (100 * int(args.update_steps)) == 0)):
+                if step % (100 * int(args.update_steps)) == 0:
                     metrics_value = [[] for _ in range(len(metrics_name[1:]))]
                     metrics_value_d = [[] for _ in range(len(metrics_name_d))]
                     while True:

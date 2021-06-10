@@ -68,9 +68,10 @@ class PPOGAEModel(RLModel):
             self.act_probs_train_mask = tf.nn.softmax(tf.add(tf.multiply(1. - self.mask_in, -1.0e9), self.act_logits_train))
 
             if not self.params.vf_share:
-                zero_state_vf = cell_dec_vf.zero_state(tf.shape(dec_input)[0], tf.float32)
-                dec_outputs_train_vf, _ = tf.nn.dynamic_rnn(
-                    cell_dec_vf, inputs=new_dec_input, time_major=False, initial_state=zero_state_vf)
+                with tf.variable_scope("encoder_state_vf"):
+                    zero_state_vf = cell_dec_vf.zero_state(tf.shape(dec_input)[0], tf.float32)
+                    dec_outputs_train_vf, _ = tf.nn.dynamic_rnn(
+                        cell_dec_vf, inputs=new_dec_input, time_major=False, initial_state=zero_state_vf)
             else:
                 dec_outputs_train_vf = dec_outputs_train
             # dec_outputs_train_vf = dec_outputs_train
@@ -82,7 +83,8 @@ class PPOGAEModel(RLModel):
             dec_states = cell_dec.zero_state(tf.shape(dec_input)[0], tf.float32)
 
             if not self.params.vf_share:
-                dec_states_vf = cell_dec_vf.zero_state(tf.shape(dec_input)[0], tf.float32)
+                with tf.variable_scope("encoder_state_vf"):
+                    dec_states_vf = cell_dec_vf.zero_state(tf.shape(dec_input)[0], tf.float32)
 
             mask_tmp = tf.ones([tf.shape(self.item_input)[0], self.item_size], dtype=tf.float32)
 
@@ -107,7 +109,8 @@ class PPOGAEModel(RLModel):
                 x = tf.concat([self.enc_outputs, dec_outputs_tile], axis=-1)
 
                 if not self.params.vf_share:
-                    dec_outputs_vf, dec_states_vf = cell_dec_vf(new_dec_input, dec_states_vf)
+                    with tf.variable_scope("encoder_state_vf"):
+                        dec_outputs_vf, dec_states_vf = cell_dec_vf(new_dec_input, dec_states_vf)
                 else:
                     dec_outputs_vf = dec_outputs
                 # dec_outputs_vf = dec_outputs

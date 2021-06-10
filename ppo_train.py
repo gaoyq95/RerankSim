@@ -32,7 +32,6 @@ def parse_args():
     # parser.add_argument('--l2_regu', default=0.0001, type=float, help='l2 loss scale')
     parser.add_argument('--timestamp', type=str, default=datetime.datetime.now().strftime("%Y%m%d%H%M"))
     parser.add_argument('--evaluator_path', type=str, default='model_eval', help='evaluator ckpt dir')
-    parser.add_argument('--pai', type=bool, default=False, help='run on pai')
     FLAGS, _ = parser.parse_known_args()
     return FLAGS
 
@@ -86,15 +85,13 @@ if __name__ == "__main__":
                     
                     for _ in range(args.update_steps):
                         total_loss, mean_return, summary2, step = model.train(x_data, rl_outputs, act_probs_one, act_idx_out, rewards, mask_arr, c_entropy)
-                    if ((not args.pai) and (step % (10 * int(args.update_steps)) == 0)) or \
-                            (args.pai and ((step+1) % (10 * int(args.update_steps)) == 0)):
+                    if step % (10 * int(args.update_steps)) == 0:
                         print('step: %d'%(step), ', '.join([name+': '+str(value) for name, value in zip(
                                                             metrics_name, [total_loss, mean_return, gauc, ndcg])]))
                         train_writer.add_summary(summary1, step)
                         train_writer.add_summary(summary2, step)
                     # validation
-                    if ((not args.pai) and (step % (100 * int(args.update_steps)) == 0)) or \
-                            (args.pai and ((step+1) % (100 * int(args.update_steps)) == 0)):
+                    if step % (100 * int(args.update_steps)) == 0:
                         # validation set
                         metrics_value = [[] for _ in range(len(metrics_name[1:]))]
                         while True:
