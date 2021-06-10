@@ -19,11 +19,11 @@
 ## Demo
   * Model training 
   ```
-  $ python dnn_train.py --algo PointWise --loss ce --timestamp 20201010101010
+  $ python dnn_train.py --algo=PointWise --loss=ce --timestamp=20201010101010
   ```
   * Model testing
   ```
-  $ python dnn_test.py --algo PointWise --loss ce --timestamp 20201010101010
+  $ python dnn_test.py --algo=PointWise --loss=ce --timestamp=20201010101010
   ``` 
 
 ## Metrics
